@@ -14,7 +14,7 @@ body{
     background-color: #2c547c;
     text-align: center;
     border-radius: 30px;
-    transition-duration: 0.4s;
+    transition-duration: 0.2s;
     max-height: 140px;
     color: #ef4f6f;
 }
@@ -71,8 +71,9 @@ header{
 
 .title{
     font-size: 3em;
-    margin-left: -3em;
+    margin-left: 1em;
     margin-top: 0.5em;
+    margin-bottom: 0.5em;
     color: rgb(150, 150, 150);
 }
 

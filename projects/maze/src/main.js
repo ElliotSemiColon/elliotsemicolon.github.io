@@ -21,7 +21,7 @@ function pushFrame(){
         {
             if(maze.cells[j][i]){
                 data = colour([i, j], maze.palette.path, data);
-            }
+            }else{ data = colour([i, j], maze.palette.wall, data); }
         }
     }
 
@@ -33,8 +33,8 @@ function pushFrame(){
         data = colour(maze.stack[maze.stack.length - 1], maze.palette.current, data);
     } //set blue
 
-    data = colour(maze.start, maze.palette.start, data);
-    data = colour(maze.goal, maze.palette.goal, data);
+    data = colour(maze.entrance, maze.palette.entrance, data);
+    data = colour(maze.exit, maze.palette.exit, data);
 
     ctx.putImageData(frame, 0, 0);
 

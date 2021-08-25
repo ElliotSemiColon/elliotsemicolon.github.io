@@ -14,12 +14,14 @@ export default class Maze{
         this.palette = 
         { 
             path: {r: 25, g: 25, b: 25},
-            start: {r: 255, g: 10, b: 10},
+            wall: {r: 0, g: 0, b: 0},
+            entrance: {r: 255, g: 10, b: 10},
             stack: {r: 100, g: 100, b: 255},
             current: {r: 255, g: 255, b: 0},
-            goal: {r: 0, g: 255, b: 10}
+            exit: {r: 0, g: 255, b: 10}
         };
-        this.goal = [1, 1];
+        this.entrance = [w - 2, 1];
+        this.exit = [1, h - 2];
 
     }
 
@@ -75,7 +77,7 @@ export default class Maze{
             next = [valids[choice][0], valids[choice][1]];
 
             this.stack.push(next); //add the pathway to the stack (gets popped in the next iteration)
-            this.end(next);
+            this.entranceExit(next);
 
         }
 
@@ -112,10 +114,14 @@ export default class Maze{
         return valids;
     }
 
-    end(goal){
+    entranceExit(cell){
 
-        if(goal[0] >= this.goal[0] && goal[1] >= this.goal[1]){
-            this.goal = goal;
+        if(cell[0] >= this.exit[0] && cell[1] <= this.exit[1]){
+            this.exit = cell;
+        }
+
+        if(cell[0] <= this.entrance[0] && cell[1] >= this.entrance[1]){
+            this.entrance = cell;
         }
 
     }

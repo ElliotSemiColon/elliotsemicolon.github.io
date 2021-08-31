@@ -2,6 +2,7 @@ import Circle from "./circle.js";
 import Player from "./player.js";
 import Rays from "./rays.js";
 import Rect from "./rect.js";
+import Maze from "./maze.js";
 
 var canvas = document.getElementById("canvas"); //links the script to the canvas in html
 var ctx = canvas.getContext("2d"); //sets renderer context
@@ -9,35 +10,66 @@ var ctx = canvas.getContext("2d"); //sets renderer context
 let dt = 0, pt = 0;
 let rays = new Rays({w: canvas.width, h: canvas.height});
 let player = new Player();
+let maze = new Maze(20, 20, [19, 1]);
 
-let scene = [
-    new Rect({x: 128, y: 0}, {r: 100, g: 100, b: 100}, {w: 256, h: 5}),
-    new Rect({x: 0, y: 72}, {r: 100, g: 100, b: 100}, {w: 5, h: 144}),
-    new Rect({x: 128, y: 144}, {r: 100, g: 100, b: 100}, {w: 256, h: 5}),
-    new Rect({x: 256, y: 72}, {r: 100, g: 100, b: 100}, {w: 5, h: 144}),
+maze.initialize();
+maze.generate();
 
-    new Rect({x: 100, y: 20}, {r: 100, g: 10, b: 100}, {w: 200, h: 5}),
-    new Rect({x: 100, y: 50}, {r: 100, g: 10, b: 100}, {w: 10, h: 50}),
-    new Rect({x: 30, y: 50}, {r: 155, g: 150, b: 100}, {w: 30, h: 10}),
-    new Circle({x: 100, y: 80}, {r: 255, g: 10, b: 10}, 10),
-    new Circle({x: 140, y: 35}, {r: 100, g: 100, b: 255}, 20),
-    new Circle({x: 240, y: 35}, {r: 100, g: 10, b: 255}, 5),
-    new Circle({x: 140, y: 100}, {r: 100, g: 10, b: 255}, 15)
-];
+maze.cells[1][1] = true; 
+maze.cells[maze.cells.length - 2][maze.cells[0].length - 2] = true; 
 
-function drawScene(){
+let scene = {objects: [], size: 12, w: 0, h: 0};
 
-    let dist = 1000000;
+scene.h = (maze.cells.length - 1) * scene.size;
+scene.w = (maze.cells[0].length - 1) * scene.size;
 
-    scene.forEach(object =>{
+for(let j = 1; j < maze.cells.length - 1; j++){
+    for(let i = 1; i < maze.cells[j].length - 1; i++){
+
+        if(!maze.cells[j][i]){
+            if(Math.random() >= 0.5){
+                scene.objects.push(new Rect(
+                    {x: i * scene.size, y: j * scene.size}, 
+                    {r: Math.random() * 255, g: Math.random() * 255, b: Math.random() * 255}, 
+                    {w: scene.size, h: scene.size}
+                    ));
+            }else{
+                scene.objects.push(new Circle(
+                    {x: i * scene.size, y: j * scene.size}, 
+                    {r: Math.random() * 255, g: Math.random() * 255, b: Math.random() * 255}, 
+                    scene.size/(Math.random() + 2)
+                    ));
+            }
+        }
+    }
+}
+
+const wallColour = {r: 255, g: 255, b: 255};
+
+//four walls
+scene.objects.push(new Rect({x: 0, y: scene.h/2 + scene.size}, wallColour, {w: scene.size, h: scene.h - scene.size})); //left vertical
+scene.objects.push(new Rect({x: scene.w/2, y: 0}, wallColour, {w: scene.w + scene.size, h: scene.size}));//top
+scene.objects.push(new Rect({x: scene.w, y: scene.h/2 - scene.size}, wallColour, {w: scene.size, h: scene.h - scene.size})); //right vertical
+scene.objects.push(new Rect({x: scene.w/2, y: scene.h}, wallColour, {w: scene.w + scene.size, h: scene.size}));//bottom
+
+function drawScene(){ //render 2d scene
+
+    // let dist = 1000000;
+
+    scene.objects.forEach(object =>{
         object.draw(ctx);
-        dist = Math.min(dist, object.distance({x: player.pos.x, y: player.pos.y}));
+        //dist = Math.min(dist, object.distance({x: player.pos.x, y: player.pos.y}));
     });
 
-    //ctx.beginPath();
-    //ctx.arc(player.pos.x, player.pos.y, dist, 0, 2 * Math.PI);
-    //ctx.stroke(); 
+    // ctx.strokeStyle = "#ffffff";
+    // ctx.beginPath();
+    // ctx.arc(player.pos.x, player.pos.y, dist, 0, 2 * Math.PI);
+    // ctx.stroke(); 
 
+    ctx.strokeStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(player.pos.x, player.pos.y, player.size, 0, 2 * Math.PI);
+    ctx.stroke(); 
 }
 
 // let square = new Rect({x: 100, y: 50}, "#445522", {w: 10, h: 20});
@@ -58,7 +90,7 @@ function mainLoop(timestamp){
 
     if(dt){
 
-        player.update(dt);
+        player.update(dt, scene);
         rays.update(player.heading, {x: player.pos.x, y: player.pos.y}, scene);
 
     }

@@ -2,11 +2,11 @@ export default class Rays{
 
     constructor(canvas){
 
-        this.fov = Math.PI/2;
+        this.fov = Math.PI/1.5;
         this.instance = canvas.w;
         this.rays = []; //rays are simple object with only a start and an end (a line segment)
-        this.radius = 50;
-        this.stepLimit = 50;
+        this.stepLimit = 30; //maximum distance calculations per ray
+        this.viewDistance = 200; 
         this.canvas = canvas;
 
     }
@@ -25,14 +25,15 @@ export default class Rays{
 
                 object = this.distance(scene, v);
                 step = object.dist;
+                len += step;
 
                 v.x += Math.cos(theta) * step; //steps along each ray by the distance to the closest object
                 v.y += Math.sin(theta) * step;
-                len += step;
 
                 if(step < 0.05){
                     break;
                 }
+                if(len > this.viewDistance) { j = this.stepLimit; }
             }
 
             this.rays[i] = { 
@@ -50,7 +51,7 @@ export default class Rays{
 
         let dist = 100000, temp, colour;
 
-        scene.forEach(object =>{
+        scene.objects.forEach(object =>{
             temp = object.distance({x: v.x, y: v.y});
             //dist = Math.min(dist, object.distance({x: v.x, y: v.y}));
             if(dist > temp){
@@ -71,16 +72,18 @@ export default class Rays{
 
             len = Math.max(this.canvas.h * (10 / (ray.len)), 0); //length of ray on screen
 
-            brightness = 1 - Math.min((Math.pow(ray.steps, 1) / this.stepLimit), 1);
+            brightness = 1 - Math.min((ray.steps / this.stepLimit), 1); //brightness of ray 
 
-            colour = ray.colour;
+            colour = ray.colour; //colour of ray
 
+            //draw one ray
             ctx.lineWidth = 1;
             ctx.strokeStyle = `rgba(${colour.r * brightness}, ${colour.g * brightness}, ${colour.b * brightness})`;
             ctx.beginPath();
             ctx.moveTo(x, (this.canvas.h - len) / 2);
             ctx.lineTo(x, (this.canvas.h + len) / 2);
             ctx.stroke();
+
             x++;
 
         });
